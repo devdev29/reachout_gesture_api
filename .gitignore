@@ -2,3 +2,6 @@
 Lib
 Scripts
 *cfg
+
+__pycache__
+share
