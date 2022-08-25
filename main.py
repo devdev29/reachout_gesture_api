@@ -46,7 +46,7 @@ async def get_gesture(ws: WebSocket):
     await ws.accept()
     while True:
         data =await ws.receive()
-        data= base64.b64encode(data[23:])
+        data= base64.b64decode(data[23:])
 
         if len(data)!=0:
             np_img = np.frombuffer(data, np.uint8)
