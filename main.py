@@ -1,3 +1,4 @@
+import sys
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
@@ -46,16 +47,23 @@ async def get_gesture(ws: WebSocket):
     await ws.accept()
     while True:
         data =await ws.receive()
-        face_bytes = bytes(data, 'utf-8')
-        face_bytes = face_bytes[face_bytes.find(b'/9'):]
-        face_img=base64.b64decode(face_bytes)
 
-        if len(data)!=0:
-            np_img = np.frombuffer(face_img, np.uint8)
-            cv_img = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
+        if data['text'] != 'null':
+            face_bytes = bytes(str(data), 'utf-8')
+            face_bytes = face_bytes[face_bytes.find(b'/9'):]
+            face_img=base64.b64decode(face_bytes)
 
-            res = get_sign(cv_img)
-        return {'gesture':res, 'description': desc[res]}
+            if len(data)!=0:
+                np_img = np.frombuffer(face_img, np.uint8)
+                cv_img = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
+
+                res = get_sign(cv_img)
+            print(res)
+        else:
+            continue
+        if res is None:
+            res=-1
+        await ws.send_json({'gesture':str(res)})
 
 @app.on_event('shutdown')
 def close_objects():
