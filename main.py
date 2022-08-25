@@ -46,10 +46,12 @@ async def get_gesture(ws: WebSocket):
     await ws.accept()
     while True:
         data =await ws.receive()
-        data= base64.b64decode(data[23:])
+        face_bytes = bytes(data, 'utf-8')
+        face_bytes = face_bytes[face_bytes.find(b'/9'):]
+        face_img=base64.b64decode(face_bytes)
 
         if len(data)!=0:
-            np_img = np.frombuffer(data, np.uint8)
+            np_img = np.frombuffer(face_img, np.uint8)
             cv_img = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
 
             res = get_sign(cv_img)
